@@ -12,15 +12,15 @@
  * visit http://creativecommons.org/licenses/by-sa/3.0/ or send a       *
  * letter to Creative Commons, 171 Second Street, Suite 300,            *
  * San Francisco, California, 94105, USA.                               *
- *----------------------------------------------------------------------*/ 
+ *----------------------------------------------------------------------*/
 
 #ifndef GPS_FREQ_H
 #define GPS_FREQ_H
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include <Arduino.h> 
+#include <Arduino.h>
 #else
-#include <WProgram.h> 
+#include <WProgram.h>
 #endif
 
 class freqCounter
@@ -30,7 +30,7 @@ class freqCounter
         void start(uint8_t gatePeriod);     //gatePeriod in seconds (1, 10, 100)
         void formatFreq(char *c);           //returns freq as a formatted string
         volatile boolean isBusy;            //flag to indicate counting complete
-		volatile unsigned int ppsTotal;		//cumulative count of pps interrupts
+        volatile unsigned int ppsTotal;     //cumulative count of pps interrupts
         volatile uint16_t _t1ovf;           //timer1 overflow count
         volatile uint8_t _gateInterrupts;   //number of interrupts (caused by the 1PPS gate signal)
         uint8_t _gatePeriod;                //gate period in seconds

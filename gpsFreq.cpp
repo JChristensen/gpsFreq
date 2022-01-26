@@ -12,7 +12,7 @@
  * visit http://creativecommons.org/licenses/by-sa/3.0/ or send a       *
  * letter to Creative Commons, 171 Second Street, Suite 300,            *
  * San Francisco, California, 94105, USA.                               *
- *----------------------------------------------------------------------*/ 
+ *----------------------------------------------------------------------*/
 
 #include <gpsFreq.h>              //http://github.com/JChristensen/gpsFreq
 
@@ -27,7 +27,8 @@ void freqCounter::start(uint8_t gatePeriod)
     isBusy = true;
     _gatePeriod = gatePeriod;
     _gateInterrupts = 0;
-    
+
+    TIMSK0 &= ~_BV(TOIE0);       //disable timer 0 overflow interrupt -- disables millis(), delay()
     EICRA = _BV(ISC01);          //external interrupt on falling edge
     EIFR = _BV(INTF0);           //clear the interrupt flag (setting ISCnn can cause an interrupt)
     EIMSK = _BV(INT0);           //enable external interrupt
@@ -39,7 +40,7 @@ void freqCounter::formatFreq(char *c)
     char f[16];
     char *pf;
     uint8_t len;
-    
+
     ltoa(freq / _gatePeriod, f, 10);
     pf = f;
     len = strlen(f);
@@ -47,17 +48,17 @@ void freqCounter::formatFreq(char *c)
         *c++ = *pf++;
         if ((len - i - 1) % 3 == 0 && i < len-1) *c++ = ',';
     }
-    
+
     if (_gatePeriod > 1) {
         itoa(freq % _gatePeriod, f, 10);
         *c++ = '.';
         if (strlen(f) < 2 && _gatePeriod > 10) *c++ = '0';
         pf = f;
-        while (*c++ = *pf++);
+        while ( (*c++ = *pf++) );
     }
     else {
         *c++ = 0;
-    }    
+    }
 }
 
 freqCounter gpsFreq = freqCounter();    //instantiate the frequency counter object for the user
@@ -79,11 +80,12 @@ ISR(INT0_vect)
         TCCR1B = 0;                                    //stop timer 1
         TIMSK1 = 0;                                    //stop timer 1 overflow interrupt
         EIMSK = 0;                                     //stop external interrupt
+        TIMSK0 |= _BV(TOIE0);                          //enable timer 0 overflow interrupt
         gpsFreq.freq = ((unsigned long)gpsFreq._t1ovf << 16) + TCNT1;
         gpsFreq.isBusy = false;
     }
     ++gpsFreq._gateInterrupts;
-	++gpsFreq.ppsTotal;
+    ++gpsFreq.ppsTotal;
 }
 
 ISR(TIMER1_OVF_vect)

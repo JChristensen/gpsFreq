@@ -32,28 +32,20 @@
  * San Francisco, California, 94105, USA.                               *
  *----------------------------------------------------------------------*/ 
 
-#include <gpsFreq.h>              //http://github.com/JChristensen/gpsFreq
-#include <Button.h>               //http://github.com/JChristensen/Button
-#include <LiquidCrystal.h>        //http://arduino.cc/en/Reference/LiquidCrystal (included with Arduino IDE)
-#include <Streaming.h>            //http://arduiniana.org/libraries/streaming/
-
-#define OUTPUT_1MHZ 1             //set to 1 to output 1MHz on MOSI/D11
+#include <gpsFreq.h>        // https://github.com/JChristensen/gpsFreq
+#include <JC_Button.h>      // https://github.com/JChristensen/Button
+#include <LiquidCrystal.h>  // https://arduino.cc/en/Reference/LiquidCrystal (included with Arduino IDE)
+#include <Streaming.h>      // https://github.com/janelia-arduino/Streaming
 
 //pin assignments
-#define LCD_RS 9                  //16x2 LCD display (your pins may vary)
-#define LCD_EN 10
-#define LCD_D4 A0
-#define LCD_D5 A1
-#define LCD_D6 A2
-#define LCD_D7 A3
-#define GATE_BUTTON 8
+#define LCD_RS 10                  //16x2 LCD display (your pins may vary)
+#define LCD_EN 11
+#define LCD_D4 A3
+#define LCD_D5 A2
+#define LCD_D6 A1
+#define LCD_D7 A0
+#define GATE_BUTTON 4
 #define GATE_LED LED_BUILTIN
-#define OC2A 11                   //MOSI pin, D11
-
-//other constants
-#define PULLUP true
-#define INVERT true
-#define DEBOUNCE_MS 25
 
 #if F_CPU == 16000000             //calculate OCR2A value for Timer 2
 #define ocr2a 7                   //16MHz, so divide by 8
@@ -66,18 +58,19 @@ unsigned int nSample;
 boolean gateLedState;
 uint8_t gateTime = 1;
 char strFreq[16];
-Button btnGate(GATE_BUTTON, PULLUP, INVERT, DEBOUNCE_MS);
+Button btnGate(GATE_BUTTON);
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 void setup()
 {
     pinMode(GATE_LED, OUTPUT);
     lcd.begin(16, 2);
+    btnGate.begin();
     Serial.begin(115200);
-    Serial << F("GPS Frequency Counter") << endl;
+    Serial << F( "\n" __FILE__ "\n" __DATE__ " " __TIME__ "\n" );
 
     #if OUTPUT_1MHZ == 1
-    pinMode(OC2A, OUTPUT);                  //set up Timer 2 for 1MHz
+    pinMode(MOSI, OUTPUT);                  //set up Timer 2 for 1MHz
     TCCR2B = 0;                             //stop timer 2
     TCCR2A = _BV(WGM21) | _BV(COM2A0);      //CTC mode, toggle OC2A on compare match
     OCR2A = ocr2a;                    
@@ -89,7 +82,8 @@ void setup()
     lcd << F("Gate: ") << gateTime << F(" sec");
 }
 
-void loop() {
+void loop()
+{
     btnGate.read();
     if (btnGate.wasReleased()) {
         if (gateTime == 100)
