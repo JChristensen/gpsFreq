@@ -18,7 +18,7 @@ void FreqCounter::start(uint8_t gatePeriod)
     m_gatePeriod = gatePeriod;
     m_gateInterrupts = 0;
 
-    TIMSK0 &= ~_BV(TOIE0);  // disable timer 0 overflow interrupt -- disables millis(), delay()
+    //TIMSK0 &= ~_BV(TOIE0);  // disable timer 0 overflow interrupt -- disables millis(), delay()
     EICRA = _BV(ISC01);     // external interrupt on falling edge
     EIFR = _BV(INTF0);      // clear the interrupt flag (setting ISCnn can cause an interrupt)
     EIMSK = _BV(INT0);      // enable external interrupt
@@ -68,7 +68,7 @@ ISR(INT0_vect)
         TCCR1B = 0;                     // stop timer 1
         TIMSK1 = 0;                     // stop timer 1 overflow interrupt
         EIMSK = 0;                      // stop external interrupt
-        TIMSK0 |= _BV(TOIE0);           // enable timer 0 overflow interrupt
+        //TIMSK0 |= _BV(TOIE0);           // enable timer 0 overflow interrupt
         gpsFreq.freq = ((uint32_t)gpsFreq.m_t1ovf << 16) + TCNT1;
         gpsFreq.isBusy = false;
     }
