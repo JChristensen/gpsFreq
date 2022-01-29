@@ -37,7 +37,6 @@ constexpr uint8_t
     gateButton {4},
     gateLED {LED_BUILTIN};
 
-uint32_t freq;
 uint16_t nSample;
 bool gateLedState;
 uint8_t gateTime {1};

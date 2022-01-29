@@ -1,6 +1,6 @@
 gpsFreq	KEYWORD1
 start	KEYWORD2
 formatFreq	KEYWORD2
-isBusy	KEYWORD2
-freq	KEYWORD2
-ppsTotal	KEYWORD2
+isBusy	LITERAL1
+ppsTotal	LITERAL1
+freq	LITERAL1
